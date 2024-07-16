@@ -1,15 +1,7 @@
 from datasets import Dataset 
-from ragas.metrics import (
-    answer_relevancy,
-    faithfulness,
-    context_recall,
-    context_precision,
-    answer_similarity,
-    answer_correctness
-)
-from ragas import evaluate
-from langchain_community.embeddings import OllamaEmbeddings 
-from langchain_community.chat_models import ChatOllama, ChatHuggingFace
+
+MODEL_NAME="phi3"
+
 context01="""
 都市計画(市政について)
 都市計画について（都市計画課）
@@ -62,28 +54,32 @@ context03="""
 倉敷エリア | 雑貨
 店先に巨大招き猫スロットマシーンが鎮座する犬猫雑貨専門店。 美観地区入口交差点から入ってすぐ右側にある、動物好きにはたまらないお店。　 1階は、猫雑貨や豆柴グッズ、フクロウグッズを豊富に取り揃えており、ところせましと並んでいます。 2階にはフクロウや猫、リス等の動物が混合展示されている話題のカフェがあります。
 """
-context04="""
-倉敷はデニムが有名。
-"""
+
 data_samples = {
     'question': ['倉敷の名産品は？'],
     'answer': ['倉敷の名産品は、「倉敷デニム」です。倉敷は日本でも有数のデニム生産地であり、高品質なデニム製品が多く生産されています。'],
-    'contexts' : [[context04]],
+    'contexts' : [[context01,context02]],
     'ground_truth': ['倉敷の名産品は、「倉敷デニム」です。']
 }
 dataset = Dataset.from_dict(data_samples)
 
+from ragas.metrics import (
+    answer_relevancy,
+    faithfulness,
+    context_recall,
+    context_precision,
+    answer_similarity,
+    answer_correctness
+)
 
-model_name = "phi3:latest"
-
-llm=None
-embeddings=None
+from langchain_community.chat_models import ChatOllama
+from ragas import evaluate
+from langchain_community.embeddings import OllamaEmbeddings
 
 # モデルのロード
 try:
-    # LangChainのHuggingFaceパイプラインの作成
-    llm = ChatOllama(model=model_name)
-    embeddings = OllamaEmbeddings(model="phi3:latest")
+    langchain_llm = ChatOllama(model=MODEL_NAME)
+    langchain_embeddings = OllamaEmbeddings(model=MODEL_NAME)
     print("Models loaded successfully.")
 except Exception as e:
     print(f"Error loading models: {e}")
@@ -98,8 +94,8 @@ result = evaluate(
         answer_similarity,
         answer_correctness
     ],
-    llm=llm,
-    embeddings=embeddings
+    llm=langchain_llm,
+    embeddings=langchain_embeddings
 )
 
 # 評価結果をExcelファイルに出力
