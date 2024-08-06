@@ -1,5 +1,6 @@
 def main():
-    print("b branch")
+    print("a branch")
+    print("merge")
 
 if __name__ == '__main__':
     main()
